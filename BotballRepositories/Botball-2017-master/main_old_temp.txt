@@ -1,0 +1,140 @@
+#include <kipr/botball.h>
+#include "createDriveOld.h"
+#include "main.h"
+
+//define variable for stopping sort while loop, probably will be done differently
+int stopSort;
+//define variables used for counting poms stored
+int blue_count , green_count , orange_count , pink_count;
+
+int main()
+{
+	camera_open_black();
+    enable_servos();
+    
+    sort_colors();
+
+    //sort poms
+    //Drop-off all poms at the furrow
+    
+    //end funcs (close camera, motors, etc)
+    camera_close();
+    disable_servos();
+    return 0;
+}
+
+// ========================== //
+//      Sorts the colors      //
+// ========================== //
+void sort_colors(){
+    //reset counts of poms
+    blue_count = 0; green_count = 0; orange_count = 0; pink_count = 0;
+    
+    stopSort = 0;
+    while (!stopSort){
+    	//detect color, return color. (-1=none,0=green,1=pink,2=orange,3=blue)
+    	int result = find_color();
+        if (result != -1){
+            switch (result){
+                case 0:
+                    set_servo_position(FURROW_SERVO_PORT,FURROW_NEAR_POS);
+                    green_count += 1;
+                    break;
+                case 1:
+                    set_servo_position(FURROW_SERVO_PORT,FURROW_MIDDLE_POS);
+                    pink_count += 1;
+                    break;
+                case 2:
+                    set_servo_position(FURROW_SERVO_PORT,FURROW_FAR_POS);
+                    orange_count += 1;
+                    break;
+                case 3:
+                    set_servo_position(FURROW_SERVO_PORT,FURROW_NEAR_POS);
+                    blue_count += 1;
+                    break;
+            }
+            
+            msleep(1300);
+        }
+        else{
+            //maybe will "go to sleep" and update less often if it detects that it has neither 
+            //seen the collection arm move nor has it seen a pom a certain number of times
+            //in a row whilst in regular update mode. if the arm moves or it DOES see a pom on  
+            //one of the infrequent checks, it will return to a regular update mode
+            msleep(400);
+        }
+    } 
+}
+int think(int color){
+	//will be used to tell whether or not poms should be dumped
+}
+
+void dump_poms(){
+	//dump poms, reset counts
+    blue_count = 0; green_count = 0; orange_count = 0; pink_count = 0;
+}
+int find_color()
+{   
+    
+    int current_highest_area = 0;   //current highest number of detected objects
+    int current_index = -1;          //current channel with highest number of detected objects
+    int x, area_max;               //declares loop variable as well as a variable used for
+                                    //storing current object count,
+    int i;
+    for (i = 0; i < CHANNEL_COUNT; i++) 
+    {
+        area_max = 0;
+        //finds channel with largest area
+        int k;
+        for (k=0; k < 5; k++)
+        {
+            camera_update();
+        }
+        x = get_object_count(i);
+        printf("x=%d i=%d\n", x, i);
+        if ( x != 0)
+        {   
+            //for loop for getting the total area of the objects
+            int j; 
+            for(j = 0; j < x; j++)
+            {
+                if (get_object_area(i,j) > area_max)
+                {
+                    area_max = get_object_area(i,j);
+                }
+            } 
+            printf("index: %d, area_max: %d\n", i, area_max);
+            //for every object there is, run once and add to total area
+            if (area_max > current_highest_area)
+            {
+                current_highest_area = area_max;
+                current_index = i;
+            }
+        }
+    }
+    return current_index;
+    }
+}
+
+
+
+void sort_green()
+{
+    printf("Sorting green poms...\n");
+}
+
+void sort_pink()
+{
+    printf("Sorting pink poms...\n");
+}
+
+void sort_orange()
+{
+    printf("Sorting orange poms...\n");
+}
+
+void sort_blue()
+{
+    printf("Sorting blue poms...\n");
+}
+

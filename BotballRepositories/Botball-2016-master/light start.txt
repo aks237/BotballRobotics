@@ -1,0 +1,38 @@
+//Need to have GOLD_TOUCH, BLACK_TOUCH, and LIGHT_PORT defined
+int light_start()
+{
+  int state = -1;
+  int min = 9999;
+  int max = 0;
+  int curr = 0;
+  int avg = 9999;
+  while(digital(GOLD_TOUCH)==0&&digital(BLACK_TOUCH)==0)
+  {
+    curr = analog(LIGHT_PORT);
+    if(curr > max)
+      max = curr;
+    if(curr < min)
+      min = curr;
+    avg = (max+min)/2;
+    printf("Min: %d\n Max: %d\n Curr: %d\n Avg: %d\n",min,max,curr,avg);
+    msleep(1);
+  }
+  while(state == -1)
+  {
+    if(digital(GOLD_TOUCH)==1)
+    {
+      printf("ARMED FOR DOUBLE ELIM ALT\n");
+      state = DEALT;
+    }
+    else if(digital(BLACK_TOUCH==1))
+    {
+      printf("ARMED\n");
+      state = REGULAR;
+    }
+  }
+  while(analog(LIGHT_PORT) > avg)
+  {
+    msleep(1);
+  }
+  return state;
+}
